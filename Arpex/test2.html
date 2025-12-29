@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Arpex PvP Ranking & Tiers</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;background:#f3f4f6;margin:0;line-height:1.6}
+    header{background:#111;color:#fff;padding:14px;text-align:center}
+    .nav{display:flex;gap:12px;justify-content:center;padding:10px;background:#1f2937}
+    .nav a{color:#fff;text-decoration:none;font-weight:600;cursor:pointer;padding: 5px 10px; border-radius: 4px; transition: background 0.2s;}
+    .nav a:hover{background: #374151;}
+    .container{max-width:1000px;margin:20px auto;padding:12px}
+    
+    .player-card{display:flex;align-items:center;background:#fff;padding:10px;border-radius:8px;margin-bottom:10px;gap:12px;cursor:pointer;box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: transform 0.1s;}
+    .player-card:active{transform: scale(0.99);}
+    
+    /* Platzierungs-Nummer Style */
+    .rank-number {font-size: 1.1em; font-weight: bold; min-width: 30px; text-align: center; color: #374151;}
+    .rank-1 {color: #d97706; /* Gold */} 
+    .rank-2 {color: #9ca3af; /* Silber */} 
+    .rank-3 {color: #b45309; /* Bronze */}
+
+    img.skin{width:64px;height:64px;object-fit:contain;border-radius:6px;image-rendering:pixelated;image-rendering:crisp-edges;}
+    img.pvp-icon{width:22px;height:22px;vertical-align: middle;object-fit:contain;image-rendering:pixelated;image-rendering:crisp-edges;}
+    
+    .profile, .tier-card{background:#fff;padding:16px;border-radius:8px;box-shadow: 0 1px 3px rgba(0,0,0,0.1)}
+    .back-btn{color:#2563eb;cursor:pointer;display:inline-block;margin-bottom:8px; font-weight: bold;}
+    h2,h3{margin:15px 0 8px 0; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px;}
+    .type-section{background:#fff;padding:10px;border-radius:8px;margin-bottom:12px}
+    .muted{color:#6b7280}
+
+    /* --- Custom Dropdown Styles (Für Bilder im Select) --- */
+    .custom-select-container {
+        position: relative;
+        width: 100%;
+        margin-bottom: 20px;
+        font-family: Arial, sans-serif;
+    }
+
+    .select-selected {
+        background-color: #fff;
+        padding: 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .select-selected:after {
+        content: "";
+        width: 0; 
+        height: 0; 
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 5px solid #374151;
+    }
+
+    .select-selected.select-arrow-active:after {
+        border-top: none;
+        border-bottom: 5px solid #374151;
+    }
+
+    .select-items {
+        position: absolute;
+        background-color: #fff;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 99;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        margin-top: 5px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        display: none; /* Standardmäßig versteckt */
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .select-hide {
+        display: none;
+    }
+
+    .select-show {
+        display: block;
+    }
+
+    .select-item {
+        padding: 10px 12px;
+        cursor: pointer;
+        border-bottom: 1px solid #f3f4f6;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .select-item:hover {
+        background-color: #f3f4f6;
+    }
+
+    .select-item:last-child {
+        border-bottom: none;
+    }
+    
+    /* Tier Tabelle Styles */
+    table {width: 100%; border-collapse: collapse; margin: 15px 0; background: #fff;}
+    th, td {padding: 10px; text-align: left; border-bottom: 1px solid #e5e7eb;}
+    th {background: #f9fafb; font-size: 0.9em; text-transform: uppercase;}
+    .badge { padding: 3px 7px; border-radius: 4px; font-weight: bold; font-size: 0.85em; display: inline-block;}
+    .lt { background: #dbeafe; color: #1e40af; }
+    .ht { background: #fee2e2; color: #991b1b; }
+    .pro { background: #fef3c7; color: #92400e; }
+    .explanation { background: #f8fafc; padding: 12px; border-left: 4px solid #1f2937; margin-bottom: 15px; font-size: 0.95em;}
+
+    @media (max-width:600px){img.skin{width:48px;height:48px} table{font-size: 0.85em;}}
+  </style>
+</head>
+<body>
+  <header><h1>Arpex PvP Ranking</h1></header>
+  <nav class="nav">
+    <a onclick="showRanking()">Ranking</a>
+    <a onclick="showPvPTypes()">PvP Arten</a>
+    <a onclick="showTierSystem()">Tier System</a>
+  </nav>
+
+  <main class="container" id="content"></main>
+
+  <script>
+    /***** CONFIG *****/
+    const DEFAULT_ICON = 'icons/default.png';
+
+    const pvpTypes = [
+      { id: 'crystal', name: 'Crystal PvP', icon: 'icons/crystal.png' },
+      { id: 'only_sword', name: 'Only Sword', icon: 'icons/sword.png' },
+      { id: 'mace', name: 'Mace PvP', icon: 'icons/mace.png' },
+      { id: 'axe', name: 'Axe PvP', icon: 'icons/axe.png' },
+      { id: 'uhc', name: 'UHC', icon: 'icons/uhc.png' },
+      { id: "smp", name: "SMP", icon: 'icons/smp.png'}
+    ];
+
+    const players = [
+      {
+        id: '@schnuckade',
+        name: 'Schnuckade',
+        skin: 'skins/schnuckade.png',
+        points: 0, /* Wird automatisch berechnet */
+        bio: 'Itz Schnuckade',
+        stats: {
+          crystal: { LT: 4, points: 234 },
+          mace: { LT: 1, points: 873 },
+          only_sword: { LT: 4, points: 219 },
+          axe: { LT: 4, points: 193 },
+          smp: { HT: 2, points: 678 },
+          uhc: { HT: 3, points: 433 }
+        }
+      },
+      {
+        id: '@smile',
+        name: 'Eminator',
+        skin: 'skins/eminator2013.png',
+        points: 0,
+        bio: 'Der alte OG',
+        stats: {
+          crystal: { LT: 5, points: 0 },
+          mace: { LT: 5, points: 0 },
+          only_sword: { LT: 5, points: 0 },
+          axe: { LT: 5, points: 0 },
+          smp: { LT: 5, points: 0 },
+          uhc: { LT: 5, points: 0 }
+        }
+      },
+      {
+        id: '@kaijo8',
+        name: 'Kaijo8',
+        skin: 'skins/kaijo8.png',
+        points: 0,
+        bio: 'Kaijo8...',
+        stats: {
+          crystal: { LT: 5, points: 0 },
+          mace: { HT: 3, points: 463 },
+          only_sword: { LT: 5, points: 0 },
+          axe: { LT: 5, points: 0 },
+          smp: { LT: 5, points: 0 },
+          uhc: { LT: 5, points: 0 }
+        }
+      },
+      {
+        id: '@maxkraft2012',
+        name: 'Maxkraft2012',
+        skin: 'skins/maxkraft2012.png',
+        points: 0,
+        bio: 'Maxkraft ist ein guter MacePVP Spieler der jedes PvP annimmt und sich seinen  Feinden stellt!!!',
+        stats: {
+          crystal: { LT: 5, points: 0 },
+          mace: { LT: 5, points: 0 },
+          only_sword: { LT: 5, points: 0 },
+          axe: { LT: 5, points: 0 },
+          smp: { LT: 5, points: 0 },
+          uhc: { LT: 5, points: 0 }
+        }
+      }
+    ];
+
+    // **********************************************
+    // NEU: Automatische Berechnung der Gesamtpunkte
+    // **********************************************
+    players.forEach(player => {
+        let totalPoints = 0;
+        // Wir holen alle Werte aus dem 'stats' Objekt
+        if(player.stats) {
+            const statsArray = Object.values(player.stats);
+            // Wir summieren alle Punkte
+            totalPoints = statsArray.reduce((summe, kategorie) => {
+                return summe + (kategorie.points || 0); // Sicherheitshalber || 0, falls points fehlt
+            }, 0);
+        }
+        // Wir speichern das Ergebnis in player.points
+        player.points = totalPoints;
+    });
+    // **********************************************
+
+
+    /***** LOGIK *****/
+
+    function makeImg(src, className, alt){
+      const img = document.createElement('img');
+      if(className) img.className = className;
+      img.alt = alt || '';
+      img.src = src;
+      img.onerror = function(){
+        if(this.src && !this._triedDefault){
+          this._triedDefault = true;
+          this.src = DEFAULT_ICON;
+        }
+      };
+      return img;
+    }
+
+    // Hilfsfunktion: Erstellt eine Spieler-Karte mit Platzierung
+    function createPlayerCard(p, index, subtext) {
+        const card = document.createElement('div'); 
+        card.className = 'player-card';
+        card.onclick = () => showProfile(p.id);
+        
+        // 1. Platzierung (Rank)
+        const rankDiv = document.createElement('div');
+        rankDiv.className = `rank-number rank-${index + 1}`;
+        rankDiv.innerText = `${index + 1}.`;
+        card.appendChild(rankDiv);
+
+        // 2. Bild
+        card.appendChild(makeImg(p.skin, 'skin', p.name));
+        
+        // 3. Text
+        const text = document.createElement('div');
+        text.innerHTML = `<strong>${escapeHtml(p.name)}</strong> — <span class='muted'>${subtext}</span>`;
+        card.appendChild(text);
+
+        return card;
+    }
+
+    function showRanking(){
+      const content = document.getElementById('content');
+      content.innerHTML = '<h2>Globales Ranking</h2>';
+      
+      const sortedList = [...players].sort((a,b)=>b.points-a.points);
+
+      sortedList.forEach((p, index) => {
+        // Tausender-Trennzeichen für die Punkteanzeige (z.B. 2.630 statt 2630)
+        const formattedPoints = p.points.toLocaleString('de-DE');
+        const card = createPlayerCard(p, index, `${formattedPoints} Punkte`);
+        content.appendChild(card);
+      });
+    }
+
+    function showPvPTypes(){
+      const content = document.getElementById('content');
+      content.innerHTML = '<h2>PvP Arten</h2>';
+      
+      // --- CUSTOM SELECT START ---
+      const selectContainer = document.createElement('div');
+      selectContainer.className = 'custom-select-container';
+
+      // 1. Der sichtbare Kopf (Selected)
+      const selectedDiv = document.createElement('div');
+      selectedDiv.className = 'select-selected';
+      selectedDiv.innerHTML = '<span>Choose Game Mode</span>';
+      
+      // 2. Die Liste mit Items (Hidden)
+      const itemsDiv = document.createElement('div');
+      itemsDiv.className = 'select-items';
+
+      // Container für die Ergebnisse (Spielerliste)
+      const listContainer = document.createElement('div');
+      listContainer.id = 'type-list';
+      listContainer.innerHTML = '<p class="muted">Bitte wähle oben eine PvP Art aus.</p>';
+
+      // Optionen füllen
+      pvpTypes.forEach(type => {
+          const item = document.createElement('div');
+          item.className = 'select-item';
+          item.innerHTML = `<img src="${type.icon}" class="pvp-icon"> ${type.name}`;
+          
+          item.onclick = function() {
+              selectedDiv.innerHTML = `<div style="display:flex;align-items:center;gap:10px;"><img src="${type.icon}" class="pvp-icon"> ${type.name}</div>`;
+              itemsDiv.classList.remove('select-show');
+              selectedDiv.classList.remove('select-arrow-active');
+              renderSpecificType(type.id, listContainer);
+          };
+          itemsDiv.appendChild(item);
+      });
+
+      // Toggle Funktion
+      selectedDiv.onclick = function(e) {
+          e.stopPropagation();
+          itemsDiv.classList.toggle('select-show');
+          selectedDiv.classList.toggle('select-arrow-active');
+      };
+
+      // Schließen wenn man woanders hinklickt
+      window.onclick = function(e) {
+          if (!e.target.matches('.select-selected') && !e.target.closest('.select-selected')) {
+              if (itemsDiv.classList.contains('select-show')) {
+                  itemsDiv.classList.remove('select-show');
+                  selectedDiv.classList.remove('select-arrow-active');
+              }
+          }
+      }
+
+      selectContainer.appendChild(selectedDiv);
+      selectContainer.appendChild(itemsDiv);
+      content.appendChild(selectContainer);
+      content.appendChild(listContainer);
+    }
+
+    function renderSpecificType(typeId, container) {
+        container.innerHTML = ''; 
+
+        if(!typeId) {
+            container.innerHTML = '<p class="muted">Bitte wähle oben eine PvP Art aus.</p>';
+            return;
+        }
+
+        const type = pvpTypes.find(t => t.id === typeId);
+        
+        const header = document.createElement('h3');
+        header.innerHTML = `<img src="${type.icon}" class="pvp-icon"> ${type.name} Ranking`;
+        container.appendChild(header);
+
+        const list = players
+            .filter(p => p.stats && p.stats[type.id])
+            .sort((a,b) => (b.stats[type.id].points || 0) - (a.stats[type.id].points || 0));
+
+        if(list.length === 0){
+            container.innerHTML += '<p class="muted">Keine Spieler für diesen Modus eingetragen.</p>';
+        } else {
+            list.forEach((p, index) => {
+                const points = p.stats[type.id].points || 0;
+                const card = createPlayerCard(p, index, `${points} PT`);
+                container.appendChild(card);
+            });
+        }
+    }
+
+    function showTierSystem(){
+      const content = document.getElementById('content');
+      content.innerHTML = `
+        <div class="tier-card">
+          <h2>Einstufung & Tiers</h2>
+          <div class="explanation">Die Tiers basieren auf deinen <strong>Punkten (PT)</strong>.</div>
+          <table>
+            <thead><tr><th>Bereich</th><th>Tier-Typ</th></tr></thead>
+            <tbody>
+              <tr><td>0-80</td><td><span class="badge lt">LT 5</span></td></tr>
+              <tr><td>80-120</td><td><span class="badge ht">HT 5</span></td></tr>
+              <tr><td>120-240</td><td><span class="badge lt">LT 4</span></td></tr>
+              <tr><td>240-260</td><td><span class="badge ht">HT 4</span></td></tr>
+              <tr><td>260-400</td><td><span class="badge lt">LT 3</span></td></tr>
+              <tr><td>400-460</td><td><span class="badge ht">HT 3</span></td></tr>
+              <tr><td>460-600</td><td><span class="badge lt">LT 2</span></td></tr>
+              <tr><td>600-700</td><td><span class="badge ht">HT 2</span></td></tr>
+              <tr><td>700-900</td><td><span class="badge lt">LT 1</span></td></tr>
+              <tr><td>900-1000</td><td><span class="badge ht">HT 1</span></td></tr>
+            </tbody>
+          </table>
+          <h3>Pro Tiers</h3>
+          <table>
+            <tbody>
+              <tr><td>1000-1200</td><td><span class="badge pro">Pro Tier 5</span></td></tr>
+              <tr><td>1200-1500</td><td><span class="badge pro">Pro Tier 4</span></td></tr>
+              <tr><td>1500-1800</td><td><span class="badge pro">Pro Tier 3</span></td></tr>
+              <tr><td>1800-2200</td><td><span class="badge pro">Pro Tier 2</span></td></tr>
+              <tr><td>2200+</td><td><span class="badge pro">Pro Tier 1</span></td></tr>
+            </tbody>
+          </table>
+        </div>`;
+    }
+
+    function showProfile(id){
+      const p = players.find(x=>x.id===id);
+      if(!p) return;
+      const content = document.getElementById('content');
+      content.innerHTML = `<div class="back-btn" onclick="showRanking()">← Zurück</div>
+        <div class="profile">
+          <h2>${escapeHtml(p.name)}</h2>
+          <img src="${p.skin}" class="skin">
+          <p><strong>Bio:</strong> ${escapeHtml(p.bio)}</p>
+          <p><strong>Gesamtpunkte:</strong> ${p.points.toLocaleString('de-DE')}</p>
+          <h3>PvP Stats</h3>
+          <div id="stats-list"></div>
+        </div>`;
+      
+      const list = document.getElementById('stats-list');
+      pvpTypes.forEach(type => {
+        const s = p.stats && p.stats[type.id];
+        if(s){
+          const div = document.createElement('p');
+          // Hier können wir auch die Punkte direkt anzeigen
+          div.innerHTML = `<img src="${type.icon}" class="pvp-icon"> <strong>${type.name}:</strong> ${s.LT || s.HT || ''} (${s.points} Pts)`;
+          list.appendChild(div);
+        }
+      });
+    }
+
+    function escapeHtml(str){
+      if(!str) return '';
+      return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[m]);
+    }
+
+    // Init
+    showRanking();
+  </script>
+</body>
+</html>

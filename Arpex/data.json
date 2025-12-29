@@ -1,0 +1,72 @@
+{
+  "pvpTypes": [
+    { "id": "crystal", "name": "Crystal PvP", "icon": "icons/crystal.png" },
+    { "id": "only_sword", "name": "Only Sword", "icon": "icons/sword.png" },
+    { "id": "mace", "name": "Mace PvP", "icon": "icons/mace.png" },
+    { "id": "axe", "name": "Axe PvP", "icon": "icons/axe.png" },
+    { "id": "uhc", "name": "UHC", "icon": "icons/uhc.png" },
+    { "id": "smp", "name": "SMP", "icon": "icons/smp.png"}
+  ],
+  "players": [
+    {
+      "id": "@schnuckade",
+      "name": "Schnuckade",
+      "skin": "skins/schnuckade.png",
+      "points": 0,
+      "bio": "Itz Schnuckade",
+      "stats": {
+        "crystal": { "LT": 4, "points": 234 },
+        "mace": { "LT": 1, "points": 873 },
+        "only_sword": { "LT": 4, "points": 219 },
+        "axe": { "LT": 4, "points": 193 },
+        "smp": { "HT": 2, "points": 678 },
+        "uhc": { "HT": 3, "points": 433 }
+      }
+    },
+    {
+      "id": "@smile",
+      "name": "Eminator",
+      "skin": "skins/eminator2013.png",
+      "points": 0,
+      "bio": "Der alte OG",
+      "stats": {
+        "crystal": { "LT": 5, "points": 0 },
+        "mace": { "LT": 5, "points": 0 },
+        "only_sword": { "LT": 5, "points": 0 },
+        "axe": { "LT": 5, "points": 0 },
+        "smp": { "LT": 5, "points": 0 },
+        "uhc": { "LT": 5, "points": 0 }
+      }
+    },
+    {
+      "id": "@kaijo8",
+      "name": "Kaijo8",
+      "skin": "skins/kaijo8.png",
+      "points": 0,
+      "bio": "Kaijo8...",
+      "stats": {
+        "crystal": { "LT": 5, "points": 0 },
+        "mace": { "HT": 3, "points": 463 },
+        "only_sword": { "LT": 5, "points": 0 },
+        "axe": { "LT": 5, "points": 0 },
+        "smp": { "LT": 5, "points": 0 },
+        "uhc": { "LT": 5, "points": 0 }
+      }
+    },
+    {
+      "id": "@maxkraft2012",
+      "name": "Maxkraft2012",
+      "skin": "skins/maxkraft2012.png",
+      "points": 0,
+      "bio": "Maxkraft ist ein guter MacePVP Spieler der jedes PvP annimmt und sich seinen Feinden stellt!!!",
+      "stats": {
+        "crystal": { "LT": 5, "points": 0 },
+        "mace": { "LT": 5, "points": 0 },
+        "only_sword": { "LT": 5, "points": 0 },
+        "axe": { "LT": 5, "points": 0 },
+        "smp": { "LT": 5, "points": 0 },
+        "uhc": { "LT": 5, "points": 0 }
+      }
+    }
+  ]
+}
